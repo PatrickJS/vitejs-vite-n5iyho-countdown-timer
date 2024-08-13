@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vertical Countdown Timeline</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 100%;
+        background-color: #d1d5db; /* Tailwind gray-300 */
+      }
+      .grayscale {
+        filter: grayscale(100%) !important;
+        opacity: 0.5 !important;
+      }
+      .strikethrough {
+        text-decoration: line-through !important;
+      }
+      .active {
+        filter: none !important;
+        opacity: 1 !important;
+      }
+      .highlight {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #000;
+      }
+      .disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto mt-10 text-center">
+      <div class="sticky-header bg-gray-100 p-4">
+        <h2 class="text-2xl font-bold mb-4">
+          Lakerid Mine: Add'l Investigation
+        </h2>
+        <div
+          class="timer-container mb-4 flex items-center justify-center gap-4"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            class="w-8 h-8"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m-3 5a9 9 0 110-18 9 9 0 010 18z"
+            />
+          </svg>
+          <h1 id="timer-header" class="timer text-4xl font-bold">2:00</h1>
+        </div>
+        <div class="mb-4 flex items-center justify-center gap-4">
+          <input
+            id="minutes-input"
+            type="number"
+            min="0"
+            class="border rounded px-4 py-2 w-24"
+            value="2"
+          />
+          <select id="seconds-select" class="border rounded px-4 py-2">
+            <option value="00">00</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <select id="group-select" class="border rounded px-4 py-2">
+            <option value="30s">Group A at 30s, Group B at 0s</option>
+            <option value="0s">Group A at 0s, Group B at 30s</option>
+          </select>
+        </div>
+        <div class="space-x-2 mb-4">
+          <button
+            id="start-button"
+            class="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Start
+          </button>
+          <button
+            id="reset-button"
+            class="bg-red-500 text-white px-4 py-2 rounded disabled"
+            disabled
+          >
+            Reset
+          </button>
+          <label class="ml-4">
+            <input type="checkbox" id="debug-mode" class="mr-2" /> Debug Mode
+          </label>
+        </div>
+      </div>
+      <div id="timeline" class="relative mt-10 timeline">
+        <div id="timeline-content" class="relative flex flex-col space-y-8">
+          <!-- Timeline content will be inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Avatar groups
+      const groupA = [
+        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000010.png', // Avatar 1
+        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000300.png', // Avatar 2
+      ];
+
+      const groupB = [
+        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_133001000.png', // Avatar 5
+        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131005100.png', // Avatar 6
+        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000110.png', // Avatar 7
+        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131002100.png', // Avatar 8
+      ];
+
+      let interval;
+      let totalSeconds = 120; // Default to 2:00 in seconds
+      let isPaused = true;
+      let isStarted = false;
+
+      // Helper functions
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+      }
+
+      function parseTime(minutes, seconds) {
+        return minutes * 60 + seconds;
+      }
+
+      function validateTime(minutes, seconds) {
+        return minutes >= 0 && (seconds === 0 || seconds === 30);
+      }
+
+      function renderTimeBlock(seconds, groupSetting) {
+        const timeLabel = formatTime(seconds);
+        const avatarGroup =
+          groupSetting === '30s'
+            ? seconds % 60 === 0
+              ? groupB
+              : groupA
+            : seconds % 60 === 0
+            ? groupA
+            : groupB;
+
+        const groupHTML = avatarGroup
+          .map(
+            (src) =>
+              `<img class="w-8 h-8 rounded-full border-2 border-white grayscale" src="${src}" alt="Avatar">`
+          )
+          .join('');
+
+        return `
+      <div class="relative flex items-center" data-time="${seconds}">
+        <div class="w-1/2 text-right pr-4">
+          <span class="time-label text-gray-500 grayscale">${timeLabel}</span>
+        </div>
+        <div class="w-1/2 flex -space-x-1">
+          ${groupHTML}
+        </div>
+      </div>
+    `;
+      }
+
+      function renderTimeline(totalSeconds) {
+        const timelineContent = document.getElementById('timeline-content');
+        timelineContent.innerHTML = '';
+
+        const groupSetting = document.getElementById('group-select').value;
+        let seconds = totalSeconds;
+
+        while (seconds >= 0) {
+          timelineContent.innerHTML += renderTimeBlock(seconds, groupSetting);
+          seconds -= 30;
+        }
+      }
+
+      function updateTimerDisplay() {
+        document.getElementById('timer-header').textContent =
+          formatTime(totalSeconds);
+
+        const timeBlocks = document.querySelectorAll('[data-time]');
+        timeBlocks.forEach((block) => {
+          const blockTime = parseInt(block.getAttribute('data-time'), 10);
+          const timeLabel = block.querySelector('.time-label');
+
+          if (blockTime === totalSeconds) {
+            timeLabel.classList.add('highlight');
+            block
+              .querySelectorAll('img')
+              .forEach((img) => img.classList.add('active'));
+            timeLabel.classList.add('active');
+          } else {
+            timeLabel.classList.remove('highlight');
+            block
+              .querySelectorAll('img')
+              .forEach((img) => img.classList.remove('active'));
+            timeLabel.classList.remove('active');
+          }
+
+          if (blockTime > totalSeconds) {
+            timeLabel.classList.add('strikethrough');
+          }
+
+          if (
+            blockTime >= totalSeconds - 15 &&
+            blockTime <= totalSeconds + 15
+          ) {
+            block
+              .querySelectorAll('img')
+              .forEach((img) => img.classList.remove('grayscale'));
+            timeLabel.classList.remove('grayscale');
+            timeLabel.classList.remove('strikethrough');
+          } else if (blockTime < totalSeconds) {
+            block
+              .querySelectorAll('img')
+              .forEach((img) => img.classList.add('grayscale'));
+            timeLabel.classList.remove('strikethrough');
+          } else if (blockTime > totalSeconds) {
+            block
+              .querySelectorAll('img')
+              .forEach((img) => img.classList.add('grayscale'));
+            timeLabel.classList.add('strikethrough');
+          }
+        });
+
+        // Scroll the timeline to keep the current time in view
+        const currentBlock = document.querySelector(
+          `[data-time="${totalSeconds}"]`
+        );
+        if (currentBlock) {
+          currentBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
+      function startCountdown() {
+        if (!isStarted) {
+          isStarted = true;
+          document.getElementById('start-button').textContent = 'Pause';
+          document.getElementById('reset-button').disabled = false;
+          document.getElementById('reset-button').classList.remove('disabled');
+        } else if (isPaused) {
+          document.getElementById('start-button').textContent = 'Pause';
+        } else {
+          document.getElementById('start-button').textContent = 'Resume';
+        }
+
+        if (!isPaused) {
+          pauseCountdown();
+          return;
+        }
+
+        isPaused = false;
+
+        const debugMode = document.getElementById('debug-mode').checked;
+        const speed = debugMode ? 100 : 1000;
+
+        interval = setInterval(() => {
+          if (totalSeconds < 0) {
+            clearInterval(interval);
+            return;
+          }
+
+          updateTimerDisplay();
+
+          totalSeconds -= 1;
+        }, speed);
+      }
+
+      function pauseCountdown() {
+        isPaused = true;
+        clearInterval(interval);
+        document.getElementById('start-button').textContent = 'Resume';
+      }
+
+      function resetCountdown() {
+        isPaused = true;
+        isStarted = false;
+        clearInterval(interval);
+        const minutes = parseInt(
+          document.getElementById('minutes-input').value,
+          10
+        );
+        const seconds = parseInt(
+          document.getElementById('seconds-select').value,
+          10
+        );
+        totalSeconds = parseTime(minutes, seconds); // Reset to the set time
+        document.getElementById('timer-header').textContent =
+          formatTime(totalSeconds);
+        document.getElementById('start-button').textContent = 'Start';
+        document.getElementById('reset-button').disabled = true;
+        document.getElementById('reset-button').classList.add('disabled');
+        renderTimeline(totalSeconds);
+      }
+
+      function setTime() {
+        const minutes = parseInt(
+          document.getElementById('minutes-input').value,
+          10
+        );
+        const seconds = parseInt(
+          document.getElementById('seconds-select').value,
+          10
+        );
+        if (validateTime(minutes, seconds)) {
+          totalSeconds = parseTime(minutes, seconds);
+          document.getElementById('timer-header').textContent =
+            formatTime(totalSeconds);
+          renderTimeline(totalSeconds);
+          document.getElementById('reset-button').disabled = false;
+          document.getElementById('reset-button').classList.remove('disabled');
+        } else {
+          alert('Please enter a valid time with minutes and 00 or 30 seconds.');
+        }
+      }
+
+      // Event listeners for inputs
+      document
+        .getElementById('minutes-input')
+        .addEventListener('input', setTime);
+      document
+        .getElementById('seconds-select')
+        .addEventListener('change', setTime);
+
+      // Event listeners for buttons
+      document
+        .getElementById('start-button')
+        .addEventListener('click', startCountdown);
+      document
+        .getElementById('reset-button')
+        .addEventListener('click', resetCountdown);
+
+      // Generate timeline for the default timer
+      renderTimeline(totalSeconds);
+    </script>
+  </body>
+</html>
