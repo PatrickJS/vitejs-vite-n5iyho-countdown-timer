@@ -43,6 +43,8 @@
   </head>
   <body class="bg-gray-100">
     <div class="max-w-4xl mx-auto mt-10 text-center">
+      <div id="select-skill"></div>
+
       <div class="sticky-header bg-gray-100 p-4">
         <h2 class="text-2xl font-bold mb-4">
           Lakerid Mine: Add'l Investigation
@@ -111,19 +113,85 @@
       </div>
     </div>
 
-    <script>
-      // Avatar groups
-      const groupA = [
-        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000010.png', // Avatar 1
-        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000300.png', // Avatar 2
-      ];
+    
 
-      const groupB = [
-        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_133001000.png', // Avatar 5
-        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131005100.png', // Avatar 6
-        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000110.png', // Avatar 7
-        'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131002100.png', // Avatar 8
-      ];
+  
+    
+    <script>
+const availableSkills = [
+  { id: '120000300', name: 'Charlotte α', duration: 63.75 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000300.png', type: 'Party Buff' },
+  { id: '120000110', name: 'Erinse β', duration: 63.75 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000110.png', type: 'Party Buff' },
+  { id: '120000400', name: 'Einrain α', duration: 55.25 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000400.png', type: 'Party Buff' },
+  { id: '133001000', name: 'Foreign Bandit Leader Brown Bear', duration: 55.25 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_133001000.png', type: 'Party Buff' },
+  { id: '131005100', name: 'Elite Knights', duration: 55.25 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131005100.png', type: 'Party Buff' },
+  { id: '120000510', name: 'Electra β', duration: 55.25 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000510.png', type: 'Party Buff' },
+  { id: '120000410', name: 'Einrain β', duration: 59.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000410.png', type: 'Enemy Debuff' },
+  { id: '131002100', name: 'Providence Eye', duration: 59.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131002100.png', type: 'Enemy Debuff' },
+  { id: '131000500', name: 'Roaring Gold', duration: 59.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131000500.png', type: 'Enemy Debuff' },
+  { id: '131001600', name: 'Small Fighter', duration: 59.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131001600.png', type: 'Enemy Debuff' },
+  { id: '131001800', name: 'Valley Vanguard', duration: 59.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131001800.png', type: 'Enemy Debuff' },
+  { id: '131003300', name: 'Foreign bandit scout fox', duration: 59.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131003300.png', type: 'Enemy Debuff' },
+  { id: '120000010', name: 'Fest β', duration: 76.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_120000010.png', type: 'Self Buff' },
+  { id: '131003800', name: 'Pryle Anima', duration: 76.5 * 100, img: 'https://raw.githubusercontent.com/whotookzakum/bpassets/main/UI/Icon/Imagine/Battle/UI_Icon_131003800.png', type: 'Self Buff' },
+];
+document.getElementById('select-skill').innerHTML = `
+  <div class="container mx-auto p-4">
+    <div class="grid gap-6">
+      <!-- Loop through availableSkills to create the UI for each skill -->
+      ${availableSkills.map(skill => `
+        <div class="flex items-center justify-between p-4 border rounded-lg">
+          <div class="flex items-center">
+            <img src="${skill.img}" alt="${skill.name}" class="w-16 h-16 rounded-lg mr-4">
+            <div>
+              <span>${skill.name}</span>
+              <div class="text-sm text-gray-500">Duration: ${(skill.duration / 1000).toFixed(2)} seconds</div>
+            </div>
+          </div>
+          <div>
+            <label for="groupSelect-${skill.id}" class="sr-only">Select Group</label>
+            <select id="groupSelect-${skill.id}" class="block p-2 border rounded-lg bg-white"
+              onchange="updateGroup('${skill.id}', this.value)">
+              <option value="">Select Group</option>
+              <option value="groupA">Group A</option>
+              <option value="groupB">Group B</option>
+            </select>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+      window.updatedGroup = false;
+      window.groupA = [];
+      window,groupB = [];
+    
+      function updateGroup(skillId, group) {
+        window.updatedGroup = true;
+        const skill = availableSkills.find(s => s.id === skillId);
+    
+        // Remove the skill from both groups first
+        removeSkillFromGroup(skillId, groupA);
+        removeSkillFromGroup(skillId, groupB);
+    
+        // Add the skill to the selected group
+        if (group === 'groupA') {
+          groupA.push(skill);
+        } else if (group === 'groupB') {
+          groupB.push(skill);
+        }
+    
+        console.log('Group A:', groupA);
+        console.log('Group B:', groupB);
+      }
+    
+      function removeSkillFromGroup(skillId, group) {
+        const index = group.findIndex(s => s.id === skillId);
+        if (index > -1) {
+          group.splice(index, 1);
+        }
+      }
+    </script>
+
+    <script>
 
       let interval;
       let totalSeconds = 120; // Default to 2:00 in seconds
@@ -158,8 +226,8 @@
 
         const groupHTML = avatarGroup
           .map(
-            (src) =>
-              `<img class="w-8 h-8 rounded-full border-2 border-white grayscale" src="${src}" alt="Avatar">`
+            (item) =>
+              `<img class="w-8 h-8 rounded-full border-2 border-white grayscale" src="${item.img || item}" alt="Avatar">`
           )
           .join('');
 
@@ -247,6 +315,10 @@
       }
 
       function startCountdown() {
+        if (window.updatedGroup) {
+          window.updatedGroup = !window.updatedGroup;
+          resetCountdown();
+        }
         if (!isStarted) {
           isStarted = true;
           document.getElementById('start-button').textContent = 'Pause';
@@ -262,6 +334,7 @@
           pauseCountdown();
           return;
         }
+        
 
         isPaused = false;
 
