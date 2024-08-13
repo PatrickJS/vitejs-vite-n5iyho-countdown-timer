@@ -136,30 +136,38 @@ const availableSkills = [
 ];
 document.getElementById('select-skill').innerHTML = `
   <div class="container mx-auto p-4">
-    <div class="grid gap-6">
-      <!-- Loop through availableSkills to create the UI for each skill -->
-      ${availableSkills.map(skill => `
-        <div class="flex items-center justify-between p-4 border rounded-lg">
-          <div class="flex items-center">
-            <img src="${skill.img}" alt="${skill.name}" class="w-16 h-16 rounded-lg mr-4">
-            <div>
-              <span>${skill.name}</span>
-              <div class="text-sm text-gray-500">Duration: ${(skill.duration / 1000).toFixed(2)} seconds</div>
-            </div>
-          </div>
-          <div>
-            <label for="groupSelect-${skill.id}" class="sr-only">Select Group</label>
-            <select id="groupSelect-${skill.id}" class="block p-2 border rounded-lg bg-white"
-              onchange="updateGroup('${skill.id}', this.value)">
-              <option value="">Select Group</option>
-              <option value="groupA">Group A</option>
-              <option value="groupB">Group B</option>
-            </select>
-          </div>
+    <!-- Group by type and create a section for each type -->
+    ${['Party Buff', 'Enemy Debuff', 'Self Buff'].map(type => `
+      <div>
+        <h2 class="text-xl font-bold mb-4 mt-8">${type}</h2>
+        <div class="grid gap-6">
+          ${availableSkills
+            .filter(skill => skill.type === type)
+            .map(skill => `
+              <div class="flex items-center justify-between p-4 border rounded-lg">
+                <div class="flex items-center">
+                  <img src="${skill.img}" alt="${skill.name}" class="w-16 h-16 rounded-lg mr-4">
+                  <div>
+                    <span>${skill.name}</span>
+                    <div class="text-sm text-gray-500">Duration: ${(skill.duration / 1000).toFixed(2)} seconds</div>
+                  </div>
+                </div>
+                <div>
+                  <label for="groupSelect-${skill.id}" class="sr-only">Select Group</label>
+                  <select id="groupSelect-${skill.id}" class="block p-2 border rounded-lg bg-white"
+                    onchange="updateGroup('${skill.id}', this.value)">
+                    <option value="">Select Group</option>
+                    <option value="groupA">Group A</option>
+                    <option value="groupB">Group B</option>
+                  </select>
+                </div>
+              </div>
+            `).join('')}
         </div>
-      `).join('')}
-    </div>
+      </div>
+    `).join('')}
   </div>`;
+
       window.updatedGroup = false;
       window.groupA = [];
       window,groupB = [];
